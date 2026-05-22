@@ -40,35 +40,40 @@ tools = [
 
 def run_query(query: str) -> str:
     messages = [{"role": "user", "content": query}]
-    
-    while True:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=messages,
-            tools=tools,
-            tool_choice="auto",
-            max_tokens=1024
-        )
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            while True:
+                 response = client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=messages,
+                    tools=tools,
+                    tool_choice="auto",
+                    max_tokens=1024
+                )    
+                 msg = response.choices[0].message
+                 msg_dict = {"role": "assistant", "content": msg.content}
+                 if msg.tool_calls:
+                      msg_dict["tool_calls"] = msg.tool_calls
+                 messages.append(msg_dict)
+
+                 if not msg.tool_calls:
+                    return msg.content
+                
+                 for tool_call in msg.tool_calls:
+                    args = json.loads(tool_call.function.arguments)
+                    result = search(args["query"])
+                    messages.append({
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "content": result
+                    })
+        except Exception as e:
+            if attempt == max_retries - 1:
+                return f"Error after {max_retries} attempts: {str(e)}"
+            messages = [{"role": "user", "content": query}]  # reset and retry
         
-        msg = response.choices[0].message
-        msg_dict = {"role": "assistant", "content": msg.content}
-        if msg.tool_calls:
-            msg_dict["tool_calls"] = msg.tool_calls
-        messages.append(msg_dict)
-        
-        # No tool calls = final answer
-        if not msg.tool_calls:
-            return msg.content
-        
-        # Execute tool calls
-        for tool_call in msg.tool_calls:
-            args = json.loads(tool_call.function.arguments)
-            result = search(args["query"])
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tool_call.id,
-                "content": result
-            })
+     
 
 if __name__ == "__main__":
     response = run_query("What is LangChain and what are its latest features?")
