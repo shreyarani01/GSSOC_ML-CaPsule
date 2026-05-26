@@ -21,8 +21,12 @@ nltk.download('popular', quiet=True) # for downloading packages
 #nltk.download('wordnet') # first-time use only
 
 
+import os
+
 #Reading in the corpus
-with open('chatbot.txt','r', encoding='utf8', errors ='ignore') as fin:
+base_dir = os.path.dirname(os.path.abspath(__file__))
+file_path = os.path.join(base_dir, 'chatbot.txt')
+with open(file_path,'r', encoding='utf8', errors ='ignore') as fin:
     raw = fin.read().lower()
 
 #TOkenisation
