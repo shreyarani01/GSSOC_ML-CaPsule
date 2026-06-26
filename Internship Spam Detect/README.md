@@ -1,147 +1,54 @@
 # Internship Scam Detection
 
-A full-stack machine learning application designed to detect fraudulent or spam internship postings. This project uses a trained supervised learning model (Decision Tree) served via a Flask backend, with a responsive web interface for users to analyze job descriptions and requirements.
+A full-stack machine learning web application designed to detect fraudulent or spam internship postings using an optimized Decision Tree pipeline.
 
 ---
 
-## Project Structure
+## Dataset
+- **Source:** Kaggle Internship Scam Detection Dataset
+- The notebook downloads the raw dataset as `internship_scam_data.csv` via `gdown`:
+- **Link:** [Google Drive Dataset Link](https://drive.google.com/file/d/1JzvRWYKAjDbjhuVZSMJvIbGJryxyVKQo/view?usp=sharing)
 
-```text
-Internship Scam Detection/
-├── data/
-│   └── internship_scam_data.csv       # Raw dataset used for training
-├── models/
-│   ├── model.pkl                      # Trained machine learning classifier
-│   └── pipeline.pkl                   # Data preprocessing pipeline (ColumnTransformer/Imputer)
-├── notebooks/
-│   ├── internship_scam_detection.ipynb # Jupyter notebook for EDA and model training
-│   └── README.md                      # Notes specific to the modeling process
-├── static/
-│   └── styles.css                     # Custom CSS for the web frontend
-├── templates/
-│   └── index.html                     # Main HTML interface
-├── .gitignore                         # Specifies files for Git to ignore (e.g., venv, __pycache__)
-├── app.py                             # Flask backend server and API routes
-├── README.md                          # Project documentation
-└── requirements.txt                   # Python dependencies (Flask, scikit-learn, pandas, etc.)
+---
 
-```
+## Key Features
+1. Dynamic input form built with Vanilla JS and Tabler Icons.
+2. Automated pipeline handling missing inputs (`SimpleImputer`) and category encoding (`OneHotEncoder`).
+3. Model optimization via hyperparameter tuning with `GridSearchCV`.
+4. Outputs live classification outcomes alongside real-time spam probability scores.
+5. Built-in rule-based fallback mechanism for local runtime stability.
 
-## Installation & Setup
+---
 
-To run this project locally, follow these steps:
+## Tech Stack
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript (Fetch API)
+- **Backend:** Python, Flask, Flask-CORS
+- **Machine Learning:** scikit-learn, pandas, numpy, joblib
+- **Utilities:** gdown
 
-**1. Clone the repository**
-
-```bash
-git clone <your-repository-url>
-cd "Internship Scam Detection"
-```
-
-**2. Create a virtual environment**
-A virtual environment keeps your project dependencies isolated.
-
-```bash
-python -m venv venv
-```
-
-**3. Activate the virtual environment**
-
-* On macOS/Linux:
-```bash
-source venv/bin/activate
-```
-
-
-* On Windows:
-```bash
-venv\Scripts\activate
-```
-
-
-
-**4. Install dependencies**
-
-```bash
-pip install -r requirements.txt
-```
+---
 
 ## Usage
-
-The dataset and model files are not included in this repository (excluded via .gitignore).
-
-**To set up:**
-1. Download the dataset from Kaggle: [Link](https://www.kaggle.com/datasets/aiexplorer77/internship-scam-detection-dataset)
-2. Place it in the `data/` folder as `internship_scam_data.csv`
-3. Run the notebook to generate model files:
-```bash
-   jupyter notebook notebooks/internship_scam_detection.ipynb
-```
-4. This will generate `model.pkl` and `pipeline.pkl` in the `models/` folder
-5. Then follow the Usage steps below
-
-Once your data and models are ready, start the Flask server:
-
+1. Open `notebooks/internship_scam_detection.ipynb` in Jupyter/Colab.
+2. Run all cells (downloads data via `gdown`, trains the model, and outputs `.pkl` saves).
+3. Start the Flask backend server:
 ```bash
 flask run
 ```
-
-Open your web browser and navigate to `http://127.0.0.1:5000` to view the application. Enter the details of an internship posting, and the ML pipeline will analyze the inputs and return a confidence score indicating the likelihood of it being a scam.
-
-## Model Methodology (`notebooks/internship_scam_detection.ipynb`)
-
-The machine learning core of this application was built and optimized using `scikit-learn` in a Jupyter Notebook. The notebook walks through the entire lifecycle from raw data to a deployed model.
-
-**1. Data Preprocessing (The Pipeline)**
-To handle incoming web data cleanly, a `ColumnTransformer` pipeline was built:
-* **Imputation:** Missing numerical values (like `stipend`) are automatically filled with 0s using a `SimpleImputer`.
-* **Scaling & Encoding:** Numerical data is normalized using `StandardScaler`, while categorical text (like `work_mode` or `company_size`) is transformed into a machine-readable format using `OneHotEncoder`.
-* **Feature Selection:** High-cardinality fields (like `company_name` and `location`) were dropped to prevent the model from overfitting on highly unique text strings.
-
-**2. Model Training & Optimization**
-* **Algorithm:** The core engine is a `DecisionTreeClassifier`. 
-* **Hyperparameter Tuning:** Instead of guessing the best settings, `GridSearchCV` was used to systematically test multiple combinations of parameters (`max_depth`, `min_samples_split`, `criterion`) to find the most mathematically optimal tree.
-
-**3. Performance Metrics**
-The final optimized model achieved the following results on the isolated test set:
-* **Overall Accuracy:** 70%
-* **Scam Precision:** 74% (When it flags a scam, it is correct 74% of the time)
-* **Scam Recall:** 63% (It successfully catches 63% of all actual scams)
-
-## Technologies Used
-
-* **Frontend:** HTML5, CSS3, Vanilla JavaScript (Fetch API)
-* **Backend:** Python, Flask, Flask-CORS
-* **Machine Learning:** scikit-learn, pandas, joblib
+4. Open `http://127.0.0.1:5000` to test the application interface.
 
 ---
 
-## Live Demo
+## Model Metrics
 
-A fully deployed version of this project (including the trained model and dataset) is available on my personal repository:
+* **Overall Accuracy:** 70%
+* **Scam Precision:** 74%
+* **Scam Recall:** 63%
+
+---
+
+## Live Links & Contact
 
 * **GitHub:** [spam-detect](https://github.com/naina-bhatnagar/spam-detect)
-* **Live App:** [Render link](https://spam-detect-saj2.onrender.com)
-
----
-
-## Created by
-
-> Naina Bhatnagar
-
-* **Socials**
-* [Connect on linkedin](https://www.linkedin.com/in/nainabhatnagar/) 
-* [Connect on github](https://github.com/naina-bhatnagar)
-
----
-
-
-
-
-
-
-
-
-
-
-
+* **Live App:** [Render Link](https://spam-detect-saj2.onrender.com)
+* **Created by:** [Naina Bhatnagar](https://github.com/naina-bhatnagar)

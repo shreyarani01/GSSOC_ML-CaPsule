@@ -1,25 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- ==========================================
+         1. DOCUMENT METADATA & EXTERNAL ASSETS
+         ========================================== -->
     <meta charset="UTF-8">
     <title>SpamInternship</title>
+    <!-- Core Application Interface Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
 </head>
 <body>
     <div class="root">
+        <!-- Screen reader title for structural context -->
         <h2 class="sr-only">Spam internship detector <br>— submit a posting to check if it's legitimate</h2>
+        
+        <!-- Main Interface Header Banner -->
         <div class="header">
             <div class="badge"><i class="ti ti-shield-check" aria-hidden="true"></i> ML-powered</div>
             <div class="title">Spam internship detector</div>
             <div class="subtitle">Fill the form below — the pipeline will flag suspicious patterns</div>
         </div>
 
+        <!-- ==========================================
+         2. INTERACTIVE USER INPUT FIELDS (FORM)
+         ========================================== -->
+        
+        <!-- Stipend -->
         <div class="field-full">
             <label for="stipend">Stipend (monthly, ₹)</label>
             <input type="number" id="stipend" placeholder="stipend offered" min="0" />
         </div>
 
+        <!-- work mode and company size -->
         <div class="grid">
             <div class="field">
                 <label for="work_mode">Work Mode</label>
@@ -42,6 +55,7 @@
             </div>
         </div>
 
+        <!-- payment required and registration fee -->
         <div class="grid">
             <div class="field">
                 <label for="payment_required">Is payment required?</label>
@@ -57,6 +71,7 @@
             </div>
         </div>
 
+        <!-- type of mail and website availability -->
         <div class="grid">
             <div class="field">
                 <label for="recruiter_email_type">What type is the mail ?</label>
@@ -76,7 +91,7 @@
             </div>
         </div>
 
-
+        <!-- Interface Action Buttons -->
         <div class="actions">
             <button class="btn-secondary" onclick="clearForm()"><i class="ti ti-refresh" aria-hidden="true"></i></button>
             <button class="btn-primary" id="analyze-btn" onclick="analyzePosting()">
@@ -85,11 +100,15 @@
             </button>
         </div>
 
+        <!-- Form Explainer Subtext -->
         <div class="api-note">
             <i class="ti ti-info-circle" aria-hidden="true"></i>
             <span>check if this is a spam</span>
         </div>
 
+        <!-- ==========================================
+         3. DYNAMIC RESULT DISPLAY PANEL
+         ========================================== -->
         <div class="result-panel hidden" id="result-panel">
             <div class="result-header" id="result-header">
                 <div class="result-icon" id="result-icon"></div>
@@ -99,9 +118,10 @@
                 </div>
             </div>
             <div class="result-body">
+                <!-- Probability Bar Indicator -->
                 <div class="confidence-bar-wrap">
                     <div class="confidence-label">
-                        <span>Spam confidence</span>
+                        <span>Spam Probability</span>
                         <span id="conf-pct">—</span>
                     </div>
                     <div class="confidence-track">
@@ -109,12 +129,20 @@
                     </div>
                 </div>
                 <div class="divider"></div>
+                <!-- Container for Dynamic Anomaly Flags -->
                 <div class="flags" id="flags-list"></div>
             </div>
         </div>
     </div>
 
+    <!-- ==========================================
+         4. JAVASCRIPT CORE LOGIC
+         ========================================== -->
     <script>
+    /**
+     * Grabs form fields, formats data types, and makes 
+     * an asynchronous request to the predictive engine.
+     */
     async function analyzePosting() {
         const stipend = document.getElementById('stipend').value;
         const workMode = document.getElementById('work_mode').value;
@@ -126,6 +154,7 @@
 
         setLoading(true);
 
+        // Map categorical strings into binary
         const paymentMapped = paymentRequired === 'Yes' ? 1 : 0;
         const websiteMapped = websiteAvailable === 'Yes' ? 1 : 0;
 
@@ -150,12 +179,16 @@
             const data = await res.json();
             showResult(data);
         } catch (err) {
+            // Revert to fallback metrics if backend is unreachable
             showMockResult(payload); 
         } finally {
             setLoading(false);
         }
     }
 
+    /**
+     * Heuristic-based mock fallback generator for stability.
+     */
     function showMockResult(payload) {
         let hits = [];
         
@@ -174,12 +207,15 @@
         });
     }
 
+    /**
+     * Toggles layout states and handles submission prevention during operations.
+     */
     function setLoading(isLoading) {
         const btn = document.getElementById('analyze-btn');
         const spinner = document.getElementById('btn-spinner');
         
         if (isLoading) {
-            btn.disabled = true; // Prevents clicking twice
+            btn.disabled = true; 
             spinner.classList.remove('hidden');
         } else {
             btn.disabled = false;
@@ -187,6 +223,9 @@
         }
     }
 
+    /**
+     * Decodes operational model outputs and draws the UI component changes.
+     */
     function showResult(data) {
         const panel = document.getElementById('result-panel');
         const verdict = document.getElementById('result-verdict');
@@ -201,18 +240,20 @@
         confPct.textContent = probPercent + '%';
         confFill.style.width = probPercent + '%';
 
+        // Apply visual themes dynamically based on outcome
         if (data.is_spam) {
             verdict.textContent = 'Likely Spam';
-            verdict.style.color = '#e24b4a'; // Red
+            verdict.style.color = '#e24b4a'; 
             sub.textContent = data.note || 'Proceed with extreme caution';
             confFill.style.background = '#e24b4a'; 
         } else {
             verdict.textContent = 'Looks Legitimate';
-            verdict.style.color = '#2ea043'; // Green
+            verdict.style.color = '#2ea043'; 
             sub.textContent = data.note || 'No major red flags detected';
             confFill.style.background = '#2ea043'; 
         }
 
+        // Generate warning strings inside target grid
         if (data.flags && data.flags.length > 0) {
             flagsList.innerHTML = data.flags.map(flag => `<div>⚠️ ${flag}</div>`).join('');
         } else {
@@ -220,6 +261,9 @@
         }
     }
 
+    /**
+     * Resets input variables and forces output nodes out of focus.
+     */
     function clearForm() {
         document.getElementById('stipend').value = '';
         document.getElementById('work_mode').value = '';
